@@ -166,8 +166,23 @@ def train(hyp, opt, device, callbacks):  # hyp is path/to/hyp.yaml or hyp dictio
     # Resume
     best_fitness, start_epoch = 0.0, 0
     if pretrained:
+        # # Optimizer
+        # if ckpt['optimizer'] is not None:
+        #     optimizer.load_state_dict(ckpt['optimizer'])
+        #     best_fitness = ckpt['best_fitness']
+        #
+        # # EMA
+        # if ema and ckpt.get('ema'):
+        #     ema.ema.load_state_dict(ckpt['ema'].float().state_dict())
+        #     ema.updates = ckpt['updates']
         if resume:
             best_fitness, start_epoch, epochs = smart_resume(ckpt, optimizer, ema, weights, epochs, resume)
+        elif opt.start_epoch:
+            start_epoch = int(opt.start_epoch)
+        else:
+            start_epoch = ckpt['epoch'] + 1
+
+
         del ckpt, csd
 
     # DP mode
@@ -235,6 +250,7 @@ def train(hyp, opt, device, callbacks):  # hyp is path/to/hyp.yaml or hyp dictio
     hyp['label_smoothing'] = opt.label_smoothing
     model.nc = nc  # attach number of classes to model
     model.hyp = hyp  # attach hyperparameters to model
+    # model.class_weights = np.ones(nc, dtype=np.float)
     model.class_weights = labels_to_class_weights(dataset.labels, nc).to(device) * nc  # attach class weights
     model.names = names
 
@@ -470,7 +486,11 @@ def parse_opt(known=False):
     parser.add_argument('--bbox_interval', type=int, default=-1, help='Set bounding-box image logging interval')
     parser.add_argument('--artifact_alias', type=str, default='latest', help='Version of dataset artifact to use')
 
-    return parser.parse_known_args()[0] if known else parser.parse_args()
+    # My Additions
+    parser.add_argument('--start-epoch', type=int, default=None, help='Reduces the learning rate for fine-tuning.')
+
+    opt = parser.parse_known_args()[0] if known else parser.parse_args()
+    return opt
 
 
 def main(opt, callbacks=Callbacks()):
