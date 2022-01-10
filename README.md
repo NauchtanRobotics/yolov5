@@ -113,6 +113,9 @@ python detect.py --source 0  # webcam
                           'https://youtu.be/Zgi9g1ksQHc'  # YouTube
                           'rtsp://example.com/media.mp4'  # RTSP, RTMP, HTTP stream
 ```
+```bash
+$ python val.py --img 640 --weights runs/train/v8d/weights/best.pt --device 0 --data datasets/v8d/dataset.yaml --name v8d
+```
 
 </details>
 
