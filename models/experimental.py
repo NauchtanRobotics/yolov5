@@ -86,7 +86,7 @@ def attempt_load(weights, device=None, inplace=True, fuse=True):
             ckpt.names = dict(enumerate(ckpt.names))  # convert to dict
 
         model.append(ckpt.fuse().eval() if fuse and hasattr(ckpt, 'fuse') else ckpt.eval())  # model in eval mode
-
+    print("Finished fusing models into list.")
     # Module compatibility updates
     for m in model.modules():
         t = type(m)
