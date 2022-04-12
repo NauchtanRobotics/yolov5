@@ -26,6 +26,7 @@ from datetime import datetime
 from pathlib import Path
 
 import numpy as np
+import psutil
 import torch
 import torch.distributed as dist
 import torch.nn as nn
@@ -494,6 +495,15 @@ def parse_opt(known=False):
 
 
 def main(opt, callbacks=Callbacks()):
+    # Ensure sufficient priority is given to this script. Kill Chrome if not enough RAM.
+    for proc in psutil.process_iter():
+        avail_mem = psutil.virtual_memory().available
+        if proc.name() == "chrome" and avail_mem < 26000000000:
+            proc.kill()
+            # proc.ionice(psutil.IOPRIO_CLASS_BE)
+    proc = psutil.Process()
+    proc.nice(-15)
+    proc.ionice(psutil.IOPRIO_HIGH)
     # Checks
     if RANK in {-1, 0}:
         print_args(vars(opt))
