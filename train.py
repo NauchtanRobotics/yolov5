@@ -495,15 +495,20 @@ def parse_opt(known=False):
 
 
 def main(opt, callbacks=Callbacks()):
-    # Ensure sufficient priority is given to this script. Kill Chrome if not enough RAM.
-    for proc in psutil.process_iter():
-        avail_mem = psutil.virtual_memory().available
-        if proc.name() == "chrome" and avail_mem < 26000000000:
-            proc.kill()
-            # proc.ionice(psutil.IOPRIO_CLASS_BE)
-    proc = psutil.Process()
-    proc.nice(-15)
-    proc.ionice(psutil.IOPRIO_HIGH)
+    # # Ensure sufficient priority is given to this script. Kill Chrome if not enough RAM.
+    # for proc in psutil.process_iter():
+    #     avail_mem = psutil.virtual_memory().available
+    #     if proc.name() == "chrome" and avail_mem < 26000000000:
+    #         proc.kill()
+    #         # proc.ionice(psutil.IOPRIO_CLASS_BE)
+    # proc = psutil.Process()
+    # print()
+    # print(proc)
+    # proc.nice(-15)
+    # print("Priority = ", proc.nice())
+    # print("RLIMIT_AS =", proc.rlimit(psutil.RLIMIT_AS))
+    # proc.ionice(psutil.IOPRIO_HIGH)
+    # sys.exit()
     # Checks
     if RANK in {-1, 0}:
         print_args(vars(opt))
