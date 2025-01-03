@@ -26,7 +26,6 @@ from datetime import datetime
 from pathlib import Path
 
 import numpy as np
-import psutil
 import torch
 import torch.distributed as dist
 import torch.nn as nn
@@ -63,6 +62,7 @@ from utils.torch_utils import (EarlyStopping, ModelEMA, de_parallel, select_devi
 LOCAL_RANK = int(os.getenv('LOCAL_RANK', -1))  # https://pytorch.org/docs/stable/elastic/run.html
 RANK = int(os.getenv('RANK', -1))
 WORLD_SIZE = int(os.getenv('WORLD_SIZE', 1))
+TRAIN_ON_SOLAR_POWER = True
 
 
 def train(hyp, opt, device, callbacks):  # hyp is path/to/hyp.yaml or hyp dictionary
@@ -273,6 +273,14 @@ def train(hyp, opt, device, callbacks):  # hyp is path/to/hyp.yaml or hyp dictio
                 f"Logging results to {colorstr('bold', save_dir)}\n"
                 f'Starting training for {epochs} epochs...')
     for epoch in range(start_epoch, epochs):  # epoch ------------------------------------------------------------------
+        while TRAIN_ON_SOLAR_POWER:
+            now = datetime.now()
+            hour_of_day = now.hour + now.minute / 60
+            if 6.5 < hour_of_day < 17:
+                break  # break out to run epoch
+            else:  # just idle until next day when solar power is free
+                time.sleep(5*60)
+
         callbacks.run('on_train_epoch_start')
         model.train()
 
